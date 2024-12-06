@@ -1,52 +1,19 @@
-# Core dependencies
-python-dotenv>=0.19.0
-asyncio>=3.4.3
-aiohttp>=3.8.1
-websockets>=10.1
-
-# Database
-SQLAlchemy>=1.4.32
-alembic>=1.7.7
-psycopg2-binary>=2.9.3
-
-# Data processing
-pandas>=1.4.2
-numpy>=1.22.3
-scikit-learn>=1.0.2
-
-# ML/AI
-tensorflow>=2.8.0
-xgboost>=1.5.2
-lightgbm>=3.3.2
-optuna>=2.10.0
-
-# Technical Analysis
-ta-lib>=0.4.24
-pandas-ta>=0.3.14b0
-
-# Dashboard
-dash>=2.3.1
-dash-bootstrap-components>=1.1.0
-plotly>=5.7.0
-
-# Telegram Bot
-python-telegram-bot>=13.11
-
-# Utilities
-requests>=2.27.1
-pytz>=2022.1
-loguru>=0.6.0
-
-# Testing
-pytest>=7.1.1
-pytest-asyncio>=0.18.3
-pytest-cov>=3.0.0
-
-# Development
-black>=22.3.0
-flake8>=4.0.1
-mypy>=0.942
-
-# Documentation
-Sphinx>=4.5.0
-sphinx-rtd-theme>=1.0.0
+aiohttp==3.9.1
+asyncio==3.4.3
+binance-connector==3.5.1
+dash==2.14.1
+numpy==1.26.2
+pandas==2.1.3
+pandas-ta==0.3.14b0
+plotly==5.18.0
+psutil==5.9.6
+python-dotenv==1.0.0
+scikit-learn==1.3.2
+seaborn==0.13.0
+SQLAlchemy==2.0.23
+telegram==0.0.1
+tensorflow==2.15.0
+websockets==12.0
+xgboost==2.0.2
+lightgbm==4.1.0
+optuna==3.4.0
