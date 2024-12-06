@@ -1,142 +1,160 @@
-import asyncio
-import logging
-from datetime import datetime
-from pathlib import Path
+            current_price = self.exchange.last_prices[symbol]
+            stop_loss = current_price * (1 + self.config.RISK_CONFIG['stop_loss_margin'])
+            take_profit = current_price * (1 - self.config.RISK_CONFIG['take_profit_margin'])
 
-# Import our modules
-from config import ConfigManager
-from database.database_manager import DatabaseManager
-from exchange.exchange_manager import BinanceExchange
-from analysis.technical_analysis import TechnicalAnalysis
-from ml.model import MLModel
-from risk.risk_manager import RiskManager
-from dashboard.app import DashboardApp
-from telegram_bot.bot import TelegramBot
-
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler('alebot.log'),
-        logging.StreamHandler()
-    ]
-)
-logger = logging.getLogger(__name__)
-
-class TradingSystem:
-    def __init__(self):
-        self.initialize_components()
-        self.running = False
-        self.last_health_check = datetime.now()
-
-    def initialize_components(self):
-        # Create necessary directories
-        Path('data').mkdir(exist_ok=True)
-        Path('logs').mkdir(exist_ok=True)
-        Path('models').mkdir(exist_ok=True)
-
-        try:
-            # Initialize components
-            self.config = ConfigManager()
-            self.db = DatabaseManager(self.config)
-            self.exchange = BinanceExchange(self.config, self.db)
-            self.analysis = TechnicalAnalysis(self.config, self.db, self.exchange)
-            self.ml_model = MLModel(self.config, self.db, self.exchange, self.analysis)
-            self.risk_manager = RiskManager(
-                self.config, self.db, self.exchange, self.analysis, self.ml_model
+            # Place main order
+            order = await self.exchange.place_order(
+                symbol=symbol,
+                side='SELL',
+                quantity=size
             )
-            
-            # Initialize interfaces
-            self.dashboard = DashboardApp(
-                self.config, self.db, self.exchange,
-                self.analysis, self.ml_model, self.risk_manager
-            )
-            self.telegram_bot = TelegramBot(
-                self.config, self.db, self.exchange,
-                self.analysis, self.ml_model, self.risk_manager
-            )
-            
-            logger.info('All components initialized successfully')
-            
-        except Exception as e:
-            logger.error(f'Error initializing components: {e}')
-            raise
 
-    async def start(self):
-        try:
-            logger.info('Starting trading system...')
-            self.running = True
+            if order:
+                # Save position
+                self.active_positions[symbol] = TradePosition(
+                    symbol=symbol,
+                    side='SELL',
+                    entry_price=current_price,
+                    quantity=size,
+                    stop_loss=stop_loss,
+                    take_profit=take_profit,
+                    timestamp=datetime.now()
+                )
 
-            # Initialize connections
-            await self.exchange.connect()
-            await self.exchange.start_market_data_collection()
-
-            # Start monitoring tasks
-            asyncio.create_task(self.monitor_system_health())
-            
-            # Run interfaces
-            asyncio.create_task(self.dashboard.run())
-            asyncio.create_task(self.telegram_bot.run())
-
-            logger.info('Trading system started successfully')
-            
-            while self.running:
-                await asyncio.sleep(1)
+                logger.info(f'Sell order placed for {symbol}: {order}')
 
         except Exception as e:
-            logger.error(f'Critical error in trading system: {e}')
-            await self.shutdown()
+            logger.error(f'Error placing sell order: {e}')
 
-    async def monitor_system_health(self):
-        while self.running:
-            try:
-                # Check component health
-                await self.exchange.check_connection()
-                await self.db.check_connection()
-                
-                # Check trading conditions
-                await self.risk_manager.check_risk_levels()
-                
-                # Update ML model if needed
-                await self.ml_model.update_if_needed()
-                
-                self.last_health_check = datetime.now()
-                await asyncio.sleep(60)  # Check every minute
-                
-            except Exception as e:
-                logger.error(f'Error in health monitoring: {e}')
-                await asyncio.sleep(5)
-
-    async def shutdown(self):
-        logger.info('Shutting down trading system...')
-        self.running = False
-        
+    async def _check_exit_conditions(self, symbol: str, position: TradePosition):
+        """Check if position should be closed"""
         try:
-            # Close all positions
-            await self.exchange.close_all_positions()
-            
-            # Cleanup components
-            await self.exchange.cleanup()
-            await self.risk_manager.cleanup()
-            await self.analysis.cleanup()
-            await self.ml_model.cleanup()
-            
-            logger.info('Trading system shutdown complete')
-            
+            current_price = self.exchange.last_prices.get(symbol)
+            if not current_price:
+                return
+
+            # Check stop loss
+            if position.side == 'BUY':
+                if current_price <= position.stop_loss:
+                    await self._close_position(symbol, 'Stop loss hit')
+                elif current_price >= position.take_profit:
+                    await self._close_position(symbol, 'Take profit hit')
+            else:  # SELL position
+                if current_price >= position.stop_loss:
+                    await self._close_position(symbol, 'Stop loss hit')
+                elif current_price <= position.take_profit:
+                    await self._close_position(symbol, 'Take profit hit')
+
         except Exception as e:
-            logger.error(f'Error during shutdown: {e}')
-        finally:
-            sys.exit(0)
+            logger.error(f'Error checking exit conditions: {e}')
+
+    async def _close_position(self, symbol: str, reason: str):
+        """Close position for symbol"""
+        try:
+            position = self.active_positions.get(symbol)
+            if not position:
+                return
+
+            # Place closing order
+            close_side = 'SELL' if position.side == 'BUY' else 'BUY'
+            order = await self.exchange.place_order(
+                symbol=symbol,
+                side=close_side,
+                quantity=position.quantity
+            )
+
+            if order:
+                # Calculate P&L
+                exit_price = self.exchange.last_prices[symbol]
+                pnl = (exit_price - position.entry_price) * position.quantity \
+                    if position.side == 'BUY' else \
+                    (position.entry_price - exit_price) * position.quantity
+
+                # Log trade
+                logger.info(f'Closed {symbol} position: {reason}, PnL: {pnl:.2f}')
+
+                # Remove from active positions
+                del self.active_positions[symbol]
+
+                # Save trade to database
+                await self._save_trade_record(position, exit_price, pnl, reason)
+
+        except Exception as e:
+            logger.error(f'Error closing position: {e}')
+
+    async def _close_all_positions(self):
+        """Close all open positions"""
+        try:
+            for symbol in list(self.active_positions.keys()):
+                await self._close_position(symbol, 'Bot shutdown')
+        except Exception as e:
+            logger.error(f'Error closing all positions: {e}')
+
+    async def _update_market_data(self, symbol: str, analysis: Dict):
+        """Update market data in database"""
+        try:
+            # Prepare market data record
+            market_data = {
+                'symbol': symbol,
+                'timestamp': datetime.now(),
+                'timeframe': TimeFrame(self.config.TRADING_CONFIG['base_timeframe']),
+                'price': self.exchange.last_prices[symbol],
+                'indicators': analysis['indicators'],
+                'signals': analysis['signals'],
+                'support_resistance': {
+                    'support': analysis['support_levels'],
+                    'resistance': analysis['resistance_levels']
+                }
+            }
+
+            # Save to database
+            await self.db.insert_market_data(market_data)
+
+        except Exception as e:
+            logger.error(f'Error updating market data: {e}')
+
+    async def _save_trade_record(self, position: TradePosition, exit_price: float, 
+                               pnl: float, reason: str):
+        """Save completed trade to database"""
+        try:
+            trade_record = {
+                'symbol': position.symbol,
+                'side': position.side,
+                'entry_price': position.entry_price,
+                'exit_price': exit_price,
+                'quantity': position.quantity,
+                'pnl': pnl,
+                'reason': reason,
+                'entry_time': position.timestamp,
+                'exit_time': datetime.now()
+            }
+
+            await self.db.insert_trade(trade_record)
+
+        except Exception as e:
+            logger.error(f'Error saving trade record: {e}')
 
 async def main():
-    system = TradingSystem()
-    await system.start()
+    """Main entry point"""
+    try:
+        # Initialize and start bot
+        bot = TradingBot()
+        await bot.start()
+
+    except KeyboardInterrupt:
+        logger.info('Bot stopped by user')
+        await bot.stop()
+
+    except Exception as e:
+        logger.error(f'Critical error: {e}')
+        raise
 
 if __name__ == '__main__':
+    # Set up asyncio event loop
+    loop = asyncio.get_event_loop()
     try:
-        asyncio.run(main())
-    except KeyboardInterrupt:
-        logger.info('Trading system stopped by user')
+        loop.run_until_complete(main())
     except Exception as e:
-        logger.error(f'Unexpected error: {e}')
+        logger.error(f'Fatal error: {e}')
+    finally:
+        loop.close()
