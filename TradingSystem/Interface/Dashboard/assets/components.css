@@ -1,0 +1,190 @@
+/* Dash Component Styles */
+
+/* DatePicker */
+.DateInput_input {
+    background-color: #2a2a2a;
+    color: #ffffff;
+    border: 1px solid #3a3a3a;
+}
+
+.DateInput_input:focus {
+    border-color: #007bff;
+}
+
+.SingleDatePickerInput {
+    background-color: #2a2a2a;
+}
+
+/* Slider */
+.rc-slider-track {
+    background-color: #007bff;
+}
+
+.rc-slider-handle {
+    border-color: #007bff;
+    background-color: #ffffff;
+}
+
+.rc-slider-rail {
+    background-color: #3a3a3a;
+}
+
+/* Dropdown */
+.Select-control {
+    background-color: #2a2a2a !important;
+    border-color: #3a3a3a !important;
+    color: #ffffff !important;
+}
+
+.Select-menu-outer {
+    background-color: #2a2a2a !important;
+    border-color: #3a3a3a !important;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5) !important;
+}
+
+.Select-option {
+    background-color: #2a2a2a !important;
+    color: #ffffff !important;
+    padding: 10px !important;
+    font-size: 14px !important;
+}
+
+.Select-option.is-focused {
+    background-color: #007bff !important;
+    color: #ffffff !important;
+}
+
+.Select-option:hover {
+    background-color: #3a3a3a !important;
+    cursor: pointer;
+}
+
+.Select-value-label {
+    color: #ffffff !important;
+}
+
+.Select.is-focused > .Select-control {
+    border-color: #007bff !important;
+}
+
+.Select-placeholder {
+    color: #999999 !important;
+}
+
+.Select-input > input {
+    color: #ffffff !important;
+}
+
+.Select.is-disabled > .Select-control {
+    background-color: #1a1a1a !important;
+}
+
+/* Progress Bar */
+.progress {
+    background-color: #3a3a3a;
+    height: 20px;
+    border-radius: 4px;
+}
+
+.progress-bar {
+    background-color: #007bff;
+    transition: width 0.3s ease;
+}
+
+
+
+
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Tabs */
+.nav-tabs {
+    border-bottom: 1px solid #3a3a3a;
+}
+
+.nav-tabs .nav-link {
+    color: #ffffff;
+    background-color: transparent;
+    border: none;
+}
+
+.nav-tabs .nav-link:hover {
+    border-color: transparent;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.nav-tabs .nav-link.active {
+    color: #007bff;
+    background-color: #2a2a2a;
+    border-color: #3a3a3a #3a3a3a transparent;
+}
+
+/* Tooltips */
+.tooltip {
+    background-color: #2a2a2a;
+    border: 1px solid #3a3a3a;
+    color: #ffffff;
+    padding: 8px;
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+
+/* Radio and Checkbox */
+.custom-control-input:checked ~ .custom-control-label::before {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.custom-control-label::before {
+    background-color: #2a2a2a;
+    border: 1px solid #3a3a3a;
+}
+
+/* Input Groups */
+.input-group-text {
+    background-color: #3a3a3a;
+    border-color: #3a3a3a;
+    color: #ffffff;
+}
+
+/* Alerts */
+.alert {
+    border-radius: 4px;
+    padding: 12px;
+    margin-bottom: 1rem;
+}
+
+.alert-info {
+    background-color: rgba(23, 162, 184, 0.2);
+    border-color: #17a2b8;
+    color: #ffffff;
+}
+
+.alert-warning {
+    background-color: rgba(255, 193, 7, 0.2);
+    border-color: #ffc107;
+    color: #ffffff;
+}
+
+.alert-danger {
+    background-color: rgba(220, 53, 69, 0.2);
+    border-color: #dc3545;
+    color: #ffffff;
+}
+
+/* Modal */
+.modal-content {
+    background-color: #2a2a2a;
+    border: 1px solid #3a3a3a;
+}
+
+.modal-header {
+    border-bottom: 1px solid #3a3a3a;
+}
+
+.modal-footer {
+    border-top: 1px solid #3a3a3a;
+} 

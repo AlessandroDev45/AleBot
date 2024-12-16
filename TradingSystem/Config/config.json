@@ -1,0 +1,140 @@
+{
+    "exchange": {
+        "api_key": "",
+        "api_secret": "",
+        "symbols": ["BTCUSDT"],
+        "timeframes": ["1m", "5m", "15m", "1h", "4h", "1d"]
+    },
+    "trading": {
+        "update_interval": 60,
+        "symbols": ["BTCUSDT"],
+        "timeframes": ["1m", "5m", "15m", "1h", "4h", "1d"],
+        "risk_per_trade": 0.01,
+        "max_positions": 1,
+        "max_trades_per_day": 5,
+        "min_profit_target": 0.003,
+        "max_loss_target": 0.01,
+        "maker_fee": 0.001,
+        "taker_fee": 0.001,
+        "min_volume_24h": 1000000,
+        "available_amount": 1000,
+        "per_trade_percent": 2,
+        "min_trade_amount": 20,
+        "max_trade_amount": 1000,
+        "max_slippage": 0.001,
+        "min_risk_reward": 2.0,
+        "daily_limits": {
+            "max_trades": 5,
+            "reset_time": "00:00:00"
+        }
+    },
+    "ml": {
+        "model_type": "ensemble",
+        "sequence_length": 60,
+        "prediction_horizon": 10,
+        "batch_size": 32,
+        "epochs": 100,
+        "learning_rate": 0.001,
+        "validation_split": 0.2,
+        "early_stopping_patience": 10,
+        "confidence_threshold": 0.75,
+        "min_accuracy": 0.60,
+        "min_precision": 0.60,
+        "min_recall": 0.60,
+        "min_f1": 0.60,
+        "backtest_periods": 30,
+        "min_profit_factor": 1.5,
+        "max_drawdown": 0.10
+    },
+    "risk": {
+        "max_daily_drawdown": 0.02,
+        "max_total_drawdown": 0.10,
+        "max_position_size": 0.02,
+        "max_total_exposure": 0.10,
+        "max_correlation": 0.70,
+        "volatility_lookback": 20,
+        "atr_periods": 14,
+        "atr_multiplier": 2.0,
+        "volume_ma_periods": 20,
+        "min_volume_ratio": 1.0,
+        "max_volume_ratio": 5.0,
+        "profit_taking": {
+            "partial_1": {"size": 0.3, "target": 0.005},
+            "partial_2": {"size": 0.3, "target": 0.01},
+            "partial_3": {"size": 0.4, "target": 0.02}
+        },
+        "stop_loss": {
+            "initial": 0.01,
+            "trailing": {
+                "activation": 0.005,
+                "step": 0.002
+            }
+        }
+    },
+    "database": {
+        "url": "sqlite:///trading_bot.db",
+        "backup_interval": 3600,
+        "backup_dir": "backups",
+        "max_backups": 10,
+        "trade_history_days": 90,
+        "performance_metrics": {
+            "hourly": 168,
+            "daily": 90,
+            "weekly": 52,
+            "monthly": 24
+        }
+    },
+    "telegram": {
+        "token": "",
+        "chat_id": "",
+        "update_interval": 60
+    },
+    "dashboard": {
+        "host": "0.0.0.0",
+        "port": 8050,
+        "update_interval": 2,
+        "debug": false,
+        "sections": {
+            "overview": true,
+            "trading": true,
+            "performance": true,
+            "risk": true,
+            "settings": true,
+            "logs": true
+        },
+        "charts": {
+            "candlestick": true,
+            "volume": true,
+            "indicators": true,
+            "signals": true,
+            "trades": true,
+            "pnl": true
+        },
+        "tables": {
+            "positions": true,
+            "orders": true,
+            "trades": true,
+            "performance": true
+        }
+    },
+    "monitoring": {
+        "update_interval": 10,
+        "cpu_threshold": 80,
+        "memory_threshold": 80,
+        "disk_threshold": 80,
+        "latency_threshold": 1000,
+        "error_threshold": 10,
+        "warning_threshold": 50,
+        "metrics": {
+            "system": true,
+            "trading": true,
+            "performance": true,
+            "risk": true
+        },
+        "alerts": {
+            "email": false,
+            "telegram": true,
+            "webhook": false
+        }
+    }
+}
